@@ -29,14 +29,32 @@ if (div) {
   div.remove();
 }
 
-let html = document.body.innerHTML;
-
-html = html.replace(
-  /📷 ดูรูป/g,
-  '<img src="pic/cams.gif " style="margin-left:10px; vertical-align:middle;">'
+const walker = document.createTreeWalker(
+  document.body,
+  NodeFilter.SHOW_TEXT
 );
-
-document.body.innerHTML = html;
+const textNodes = [];
+let node;
+while ((node = walker.nextNode())) {
+  if (node.textContent.includes('📷 ดูรูป')) {
+    textNodes.push(node);
+  }
+}
+textNodes.forEach(textNode => {
+  const parts = textNode.textContent.split('📷 ดูรูป');
+  const frag = document.createDocumentFragment();
+  parts.forEach((part, i) => {
+    frag.appendChild(document.createTextNode(part));
+    if (i < parts.length - 1) {
+      const img = document.createElement('img');
+      img.src = 'pic/cams.gif';
+      img.style.marginLeft = '10px';
+      img.style.verticalAlign = 'middle';
+      frag.appendChild(img);
+    }
+  });
+  textNode.parentNode.replaceChild(frag, textNode);
+});
 
 document.querySelectorAll('a[class*=vip').forEach(el => el.remove());
 document.querySelectorAll('a[id*=book').forEach(el => el.remove());
